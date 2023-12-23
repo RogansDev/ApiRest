@@ -1,9 +1,77 @@
 const db = require('../config/config');
+const bcrypt = require('bcryptjs');
 
 const User = {}
 
 
-User.create = (user, results) => {
+User.findById = async (id, result) => {
+    const sql = `
+      SELECT 
+         id,
+         email,
+         name,
+         lastname,
+         image,
+         password,
+         document
+      FROM 
+         users
+      WHERE
+        id = ?
+    `;
+
+    db.query
+    {
+        sql,
+        [id],
+        (err, user) => {
+            if (err) {
+                console.log('Error', err)
+                result(err, null)
+            } else {
+                console.log('Usuario obtenido', user)
+                result(null, user)
+            }
+        }
+    }
+}
+
+
+User.findByEmail = async (email, result) => {
+    const sql = `
+      SELECT 
+         id,
+         email,
+         name,
+         lastname,
+         image,
+         password,
+         document
+      FROM 
+         users
+      WHERE
+        email = ?
+    `;
+
+    db.query
+    {
+        sql,
+        [email],
+        (err, user) => {
+            if (err) {
+                console.log('Error', err)
+                results(err, null)
+            } else {
+                console.log('Usuario obtenido', user)
+                results(null, user)
+            }
+        }
+    }
+}
+
+User.create = async (user, results) => {
+
+    const hash = await bcrypt.hash(user.password, 10)
 
     const sql = `
         INSERT INTO
@@ -30,7 +98,7 @@ User.create = (user, results) => {
             user.lastname,
             user.phone,
             user.image,
-            user.password,
+            hash,
             user.document,
             new Date(),
             new Date()
